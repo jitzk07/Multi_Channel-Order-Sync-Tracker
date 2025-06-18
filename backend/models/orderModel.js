@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
   channel: {
     type: String,
-    enum: ['Shopify', 'Amazon'],
+    enum: ['Shopify', 'Amazon','Flipkart'],
     required: true
   },
   orderId: {

@@ -7,8 +7,7 @@ exports.syncOrders = async (req, res) => {
 
   console.log(`🔁 Sync request received for channel: ${channel}`);
 
-  // Validate channel
-  if (!['shopify', 'amazon'].includes(channel.toLowerCase())) {
+  if (!['shopify', 'amazon','flipkart'].includes(channel.toLowerCase())) {
     console.error('❌ Invalid channel received');
     return res.status(400).json({ error: 'Invalid channel' });
   }
