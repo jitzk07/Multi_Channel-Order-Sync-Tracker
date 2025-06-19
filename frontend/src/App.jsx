@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 const App = () => {
   const [orders, setOrders] = useState([]);
   const [showFailedOnly, setShowFailedOnly] = useState(false);
+  const [showPendingOnly, setShowPendingOnly] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState('all');
 
   const fetchOrders = async () => {
@@ -24,10 +25,20 @@ const App = () => {
   }, []);
 
   const filteredOrders = orders.filter((order) => {
-    const matchesStatus = showFailedOnly ? order.status === 'failed' : true;
+    const matchesFailed = showFailedOnly ? order.status === 'failed' : true;
+    const matchesPending = showPendingOnly ? order.status === 'pending' : true;
+
+    // Ensure only one filter (failed or pending) is active at a time
+    const statusMatch =
+      showFailedOnly ? matchesFailed :
+        showPendingOnly ? matchesPending :
+          true;
+
     const matchesChannel = selectedChannel === 'all' ? true : order.channel === selectedChannel;
-    return matchesStatus && matchesChannel;
+
+    return statusMatch && matchesChannel;
   });
+
 
   const uniqueChannels = [...new Set(orders.map((o) => o.channel))];
 
@@ -49,32 +60,55 @@ const App = () => {
         <div className="lg:w-3/5 bg-white p-4 rounded-xl shadow-lg">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-blue-800">Synced Orders</h2>
-            <div className="flex gap-2">
-              {/* Filter buttons */}
+            <div className="flex flex-wrap gap-2">
+
+              {/* Show All Orders */}
               <button
-                onClick={() => setShowFailedOnly(true)}
-                disabled={showFailedOnly}
-                className={`text-sm px-3 py-1 rounded ${
-                  showFailedOnly
-                    ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                    : 'bg-red-500 hover:bg-red-600 text-white'
-                }`}
-              >
-                Show Failed Orders
-              </button>
-              <button
-                onClick={() => setShowFailedOnly(false)}
-                disabled={!showFailedOnly}
-                className={`text-sm px-3 py-1 rounded ${
-                  !showFailedOnly
-                    ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                }`}
+                onClick={() => {
+                  setShowFailedOnly(false);
+                  setShowPendingOnly(false);
+                }}
+                disabled={!showFailedOnly && !showPendingOnly}
+                className={`text-sm px-3 py-1 rounded ${!showFailedOnly && !showPendingOnly
+                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  }`}
               >
                 Show All Orders
               </button>
+              {/* Show Pending Orders */}
+              <button
+                onClick={() => {
+                  setShowPendingOnly(true);
+                  setShowFailedOnly(false);
+                }}
+                disabled={showPendingOnly}
+                className={`text-sm px-3 py-1 rounded ${showPendingOnly
+                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                  : 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                  }`}
+              >
+                Show Pending Orders
+              </button>
 
-              {/* Channel filter */}
+              {/* Show Failed Orders */}
+              <button
+                onClick={() => {
+                  setShowFailedOnly(true);
+                  setShowPendingOnly(false);
+                }}
+                disabled={showFailedOnly}
+                className={`text-sm px-3 py-1 rounded ${showFailedOnly
+                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+                  }`}
+              >
+                Show Failed Orders
+              </button>
+
+              
+
+              {/* Channel Filter Dropdown */}
               <select
                 value={selectedChannel}
                 onChange={(e) => setSelectedChannel(e.target.value)}
@@ -88,6 +122,7 @@ const App = () => {
                 ))}
               </select>
             </div>
+
           </div>
 
           <div className="max-h-[400px] overflow-auto">
@@ -110,17 +145,16 @@ const App = () => {
                     <td className="border p-3">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`px-2 py-1 rounded text-white text-xs ${
-                            order.status === 'success'
-                              ? 'bg-green-400'
-                              : order.status === 'failed'
+                          className={`px-2 py-1 rounded text-white text-xs ${order.status === 'success'
+                            ? 'bg-green-400'
+                            : order.status === 'failed'
                               ? 'bg-red-400'
                               : 'bg-yellow-400'
-                          }`}
+                            }`}
                         >
                           {order.status}
                         </span>
-                        {order.status === 'failed' && (
+                        {(order.status === 'failed' || order.status === 'pending') && (
                           <button
                             onClick={async () => {
                               try {
@@ -137,6 +171,7 @@ const App = () => {
                             Retry
                           </button>
                         )}
+
                       </div>
                     </td>
                   </tr>

@@ -11,6 +11,7 @@ import {
 const COLORS = {
   success: '#60A5FA', // Blue
   failed: '#F87171',  // Red
+  pending: '#FBBF24', // Yellow
 };
 
 const DashboardChart = ({ data }) => {
@@ -34,6 +35,7 @@ const DashboardChart = ({ data }) => {
           <Legend />
           <Bar dataKey="success" stackId="a" fill={COLORS.success} />
           <Bar dataKey="failed" stackId="a" fill={COLORS.failed} />
+          <Bar dataKey="pending" stackId="a" fill={COLORS.pending} />
         </BarChart>
       </ResponsiveContainer>
     </div>

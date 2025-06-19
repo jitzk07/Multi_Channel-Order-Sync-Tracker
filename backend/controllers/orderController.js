@@ -38,7 +38,6 @@ exports.syncOrders = async (req, res) => {
 };
 
 
-// PATCH /api/orders/retry/:orderId
 exports.retryOrder = async (req, res) => {
   const { orderId } = req.params;
 
@@ -46,7 +45,7 @@ exports.retryOrder = async (req, res) => {
     const order = await Order.findOne({ orderId });
     if (!order) return res.status(404).json({ error: 'Order not found' });
 
-    if (order.status !== 'failed') return res.status(400).json({ error: 'Order is not failed' });
+    if (order.status !== 'failed' && order.status !== 'pending') return res.status(400).json({ error: 'Order is not failed or pending' });
     console.log(`🔄 Retrying order: ${orderId}`);
 
     order.status = 'success';
