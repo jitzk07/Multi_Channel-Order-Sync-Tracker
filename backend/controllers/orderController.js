@@ -1,7 +1,7 @@
 const Order = require('../models/orderModel');
 const generateMockOrders = require('../utils/mockOrderGenerator');
+const autoUpdatePendingOrders = require('../utils/updatePendingOrders');
 
-// POST /api/orders/sync/:channel
 exports.syncOrders = async (req, res) => {
   const { channel } = req.params;
 
@@ -12,7 +12,6 @@ exports.syncOrders = async (req, res) => {
     return res.status(400).json({ error: 'Invalid channel' });
   }
 
-  // Generate mock orders
   const mockOrders = generateMockOrders(channel);
   console.log(`📦 Generated ${mockOrders.length} mock orders`);
 
@@ -45,7 +44,7 @@ exports.retryOrder = async (req, res) => {
     const order = await Order.findOne({ orderId });
     if (!order) return res.status(404).json({ error: 'Order not found' });
 
-    if (order.status !== 'failed' && order.status !== 'pending') return res.status(400).json({ error: 'Order is not failed or pending' });
+    if (order.status !== 'failed') return res.status(400).json({ error: 'Order is not failed' });
     console.log(`🔄 Retrying order: ${orderId}`);
 
     order.status = 'success';
@@ -85,6 +84,7 @@ exports.getAllOrders = async (req, res) => {
   if (status) filter.status = status;
 
   try {
+    await autoUpdatePendingOrders();
     const orders = await Order.find(filter).sort({ createdAt: -1 });
     res.status(200).json(orders);
   } catch (err) {

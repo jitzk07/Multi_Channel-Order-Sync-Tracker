@@ -7,12 +7,10 @@ const generateMockOrders = (channel) => {
   for (let i = 0; i < 5; i++) {
     const orderId = `${formattedChannel.toUpperCase()}-${uuidv4()}`;
 
-    // Randomly assign one of the three statuses
     const rand = Math.random();
     let status = 'pending';
-    if (rand < 0.6) status = 'success';      // 60% success
-    else if (rand < 0.85) status = 'failed'; // 25% failed
-    // else remain 'pending' (15%)
+    if (rand < 0.5) status = 'success';      
+    else if (rand < 0.8) status = 'failed'; 
 
     orders.push({
       channel: formattedChannel,

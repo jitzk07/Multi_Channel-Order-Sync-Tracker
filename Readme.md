@@ -11,7 +11,7 @@ This project simulates an order synchronization dashboard for a centralized ware
 - Retry failed or pending syncs manually.
 - Visual stats dashboard (histogram).
 - Filter orders by:
-  - Status (`failed`, `pending`, or all)
+  - Status (`failed`, `pending`, `channel`)
   - Channel (Shopify, Amazon, Flipkart)
 - Responsive and scrollable UI with sticky table headers.
 

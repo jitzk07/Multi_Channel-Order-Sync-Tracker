@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import SyncButton from './components/SyncButton';
 import DashboardChart from './components/DashboardChart';
 import { getOrders, retryOrder } from './services/api';
@@ -11,18 +11,31 @@ const App = () => {
   const [showPendingOnly, setShowPendingOnly] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState('all');
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const res = await getOrders();
       setOrders(res.data);
     } catch (err) {
       toast.error('Failed to fetch orders');
     }
-  };
+  }, []);
 
+
+  // Fetch once on mount
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
+
+  // Fetch every 2 minutes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 120000);
+
+    return () => clearInterval(interval);
+  }, [fetchOrders]);
+
+
 
   const filteredOrders = orders.filter((order) => {
     const matchesFailed = showFailedOnly ? order.status === 'failed' : true;
@@ -106,7 +119,7 @@ const App = () => {
                 Show Failed Orders
               </button>
 
-              
+
 
               {/* Channel Filter Dropdown */}
               <select
@@ -154,7 +167,7 @@ const App = () => {
                         >
                           {order.status}
                         </span>
-                        {(order.status === 'failed' || order.status === 'pending') && (
+                        {order.status === 'failed' && (
                           <button
                             onClick={async () => {
                               try {
